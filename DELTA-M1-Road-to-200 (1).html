@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DELTA M1 · Road to 200</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0a0b; --panel:#131315; --panel2:#1b1b1e; --raise:#212125;
+  --line:rgba(255,255,255,.12); --line2:rgba(255,255,255,.06);
+  --white:#f6f5ef; --muted:#9b9b97; --muted2:#6c6c68;
+  --y:#ffe500; --y2:#ffc400; --yd:#403c00;
+  --bad:#ff5a5a;
+  --disp:'Anton',sans-serif; --body:'Archivo',system-ui,sans-serif; --mono:'Space Mono',monospace;
+  --r:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); color:var(--white); background:var(--ink); line-height:1.5;
+  min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+/* atmosphere */
+body::before{content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 88% -6%, rgba(255,229,0,.10), transparent 60%),
+    radial-gradient(800px 600px at 8% 108%, rgba(255,229,0,.05), transparent 60%);}
+body::after{content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");}
+.wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:22px 20px 100px}
+
+/* caution stripe util */
+.tape{background-image:repeating-linear-gradient(45deg,var(--y) 0 14px,#0a0a0b 14px 28px)}
+
+/* ---------- top bar ---------- */
+.bar{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:30px}
+.brand{display:flex; align-items:center; gap:13px; cursor:pointer}
+.crest{width:46px; height:46px; flex:none; display:grid; place-items:center; background:var(--y); color:#0a0a0b;
+  font-family:var(--disp); font-size:26px; transform:rotate(-3deg); box-shadow:5px 5px 0 rgba(255,229,0,.18)}
+.brand h1{font-family:var(--disp); font-size:22px; letter-spacing:.5px; line-height:.9; text-transform:uppercase}
+.brand p{font-family:var(--mono); font-size:10px; color:var(--y); letter-spacing:3px; text-transform:uppercase; margin-top:3px}
+.xpchip{display:flex; align-items:center; gap:10px; border:1.5px solid var(--line); padding:8px 16px; cursor:pointer; transition:.2s}
+.xpchip:hover{border-color:var(--y)}
+.xpchip span{font-family:var(--mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:2px}
+.xpchip b{font-family:var(--disp); font-size:20px; color:var(--y); line-height:1}
+
+/* ---------- screens ---------- */
+.screen{display:none; animation:fade .45s ease both}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(12px)}to{opacity:1; transform:none}}
+.rise{opacity:0; animation:fade .6s ease forwards}
+
+/* ---------- hero ---------- */
+.hero{padding:18px 0 4px}
+.kicker{display:inline-flex; align-items:center; gap:10px; font-family:var(--mono); font-size:11px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--ink); background:var(--y); padding:7px 14px; margin-bottom:24px; transform:rotate(-1deg)}
+.hero h2{font-family:var(--disp); font-size:clamp(54px,13vw,128px); line-height:.84; text-transform:uppercase; letter-spacing:-1px}
+.hero h2 em{font-style:normal; color:var(--y); position:relative}
+.hero h2 em::after{content:""; position:absolute; left:-2%; right:-2%; bottom:8%; height:14%; background:var(--ink); z-index:-1}
+.hero .sub{max-width:560px; margin-top:22px; color:var(--muted); font-size:16px}
+.hero .sub b{color:var(--white)}
+
+/* goal meter */
+.goal{margin-top:34px; border:1.5px solid var(--line); background:var(--panel)}
+.goal .gh{display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1.5px solid var(--line)}
+.goal .gh span{font-family:var(--mono); font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted)}
+.goal .gh b{font-family:var(--disp); font-size:26px}.goal .gh b i{font-style:normal; color:var(--y)}
+.track{height:22px; background:repeating-linear-gradient(90deg,#161618 0 1px,transparent 1px 40px),#101012; position:relative; overflow:hidden}
+.fill{height:100%; width:0; background:var(--y); transition:width 1.1s cubic-bezier(.2,.9,.2,1); position:relative}
+.fill::after{content:""; position:absolute; inset:0; background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.15) 0 8px,transparent 8px 16px)}
+.goal small{display:block; padding:13px 20px; color:var(--muted); font-size:13px; border-top:1.5px solid var(--line2)}
+
+/* mode cards */
+.modes{display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin:28px 0 12px; border:1.5px solid var(--line)}
+.mode{position:relative; text-align:left; cursor:pointer; padding:26px 22px 30px; background:var(--panel);
+  border-right:1.5px solid var(--line); transition:.25s; overflow:hidden}
+.mode:last-child{border-right:none}
+.mode:hover{background:var(--y); color:var(--ink)}
+.mode:hover .num,.mode:hover p,.mode:hover .tagn{color:var(--ink)}
+.mode .num{font-family:var(--mono); font-size:11px; letter-spacing:2px; color:var(--y); margin-bottom:30px; display:block}
+.mode .ic{font-size:26px; margin-bottom:12px}
+.mode h3{font-family:var(--disp); font-size:24px; text-transform:uppercase; line-height:.95; margin-bottom:8px}
+.mode p{color:var(--muted); font-size:13px; transition:.25s}
+.mode .tagn{position:absolute; top:24px; right:22px; font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:1px; text-align:right}
+
+/* section grid */
+.shead{display:flex; align-items:center; gap:14px; margin:40px 0 18px}
+.shead h3{font-family:var(--disp); font-size:18px; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap}
+.shead .ln{flex:1; height:1.5px; background:var(--line)}
+.shead .pin{font-family:var(--mono); font-size:11px; color:var(--y); letter-spacing:1px}
+.secgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px}
+.sec{position:relative; cursor:pointer; border:1.5px solid var(--line); padding:20px; background:var(--panel);
+  transition:.22s; display:flex; gap:16px; align-items:center}
+.sec:hover{border-color:var(--y); transform:translate(-2px,-2px); box-shadow:6px 6px 0 rgba(255,229,0,.15)}
+.sec .badge{width:54px; height:54px; flex:none; display:grid; place-items:center; background:var(--y); color:#0a0a0b;
+  font-family:var(--disp); font-size:20px; transform:rotate(-3deg)}
+.sec.all .badge{background:var(--white)}
+.sec .meta .code{font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px}
+.sec .meta h4{font-family:var(--disp); font-size:17px; text-transform:uppercase; line-height:1; letter-spacing:.3px}
+.sec .meta .count{font-family:var(--mono); font-size:11px; color:var(--y); margin-top:8px}
+
+/* ---------- player generic ---------- */
+.pbar{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px}
+.back{display:inline-flex; align-items:center; gap:8px; cursor:pointer; color:var(--white); font-family:var(--mono); font-weight:700;
+  font-size:12px; letter-spacing:1px; text-transform:uppercase; border:1.5px solid var(--line); padding:10px 16px; transition:.2s}
+.back:hover{background:var(--y); color:var(--ink); border-color:var(--y)}
+.ptitle{text-align:right}
+.ptitle small{display:block; font-family:var(--mono); color:var(--y); font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-bottom:3px}
+.ptitle span{font-family:var(--disp); font-size:18px; text-transform:uppercase}
+.prog{height:6px; background:#101012; overflow:hidden; margin-bottom:26px; border:1px solid var(--line2)}
+.prog i{display:block; height:100%; width:0; background:var(--y); transition:width .4s ease}
+
+/* flashcard */
+.fcStage{perspective:1800px; max-width:680px; margin:0 auto}
+.fcard{position:relative; width:100%; min-height:380px; cursor:pointer; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.2,.9,.25,1)}
+.fcard.flip{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; backface-visibility:hidden; padding:34px 30px; display:flex; flex-direction:column;
+  justify-content:center; border:1.5px solid var(--line); background:var(--panel); overflow:auto}
+.face .lab{position:absolute; top:20px; left:24px; right:24px; font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted)}
+.face .hint{position:absolute; bottom:16px; left:0; right:0; text-align:center; font-family:var(--mono); font-size:10px; color:var(--muted2); letter-spacing:1px}
+.front{border-left:6px solid var(--y)}
+.front .prompt{text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--y); margin-bottom:18px}
+.front .q{text-align:center; font-family:var(--disp); font-size:clamp(24px,4.4vw,40px); line-height:1.06; text-transform:uppercase; letter-spacing:.3px}
+.front .q.sm{font-size:clamp(19px,3.2vw,27px); text-transform:none; font-family:var(--body); font-weight:800; line-height:1.25}
+.back{transform:rotateY(180deg); background:var(--y); border-color:var(--y); border-left:6px solid var(--ink)}
+.back .lab{color:rgba(0,0,0,.55)}
+.back .hint{color:rgba(0,0,0,.45)}
+.back .a{text-align:center; font-family:var(--disp); font-size:clamp(26px,5vw,46px); line-height:1.02; text-transform:uppercase; color:var(--ink); letter-spacing:.2px}
+.back .a.sm{font-size:clamp(20px,3.6vw,30px); line-height:1.2}
+.fcBtns{display:flex; gap:12px; max-width:680px; margin:22px auto 0}
+.fbtn{flex:1; cursor:pointer; border:1.5px solid var(--line); background:var(--panel); color:var(--white); padding:18px;
+  font-family:var(--disp); font-size:18px; text-transform:uppercase; letter-spacing:.5px; transition:.18s}
+.fbtn:hover{transform:translateY(-2px)}
+.fbtn.again:hover{border-color:var(--white)}
+.fbtn.got{background:var(--y); color:var(--ink); border-color:var(--y)}
+.fbtn.got:hover{box-shadow:0 10px 0 -4px rgba(255,229,0,.4)}
+
+/* quiz */
+.qStage{max-width:780px; margin:0 auto}
+.qScore{display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin-bottom:22px; border:1.5px solid var(--line)}
+.pill{text-align:center; padding:12px; border-right:1.5px solid var(--line); background:var(--panel)}
+.pill:last-child{border-right:none}
+.pill b{display:block; font-family:var(--disp); font-size:24px; line-height:1}
+.pill.streak b{color:var(--y)}
+.pill span{font-family:var(--mono); font-size:9.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted)}
+.qcard{border:1.5px solid var(--line); background:var(--panel); padding:28px 26px}
+.qtag{font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--y); margin-bottom:14px}
+.scen{font-size:14px; color:var(--muted); border-left:3px solid var(--y); padding:11px 15px; margin-bottom:18px; background:var(--panel2); line-height:1.55}
+.qtext{font-family:var(--disp); font-size:clamp(20px,3vw,28px); line-height:1.1; text-transform:uppercase; margin-bottom:24px; letter-spacing:.3px}
+.opts{display:flex; flex-direction:column; gap:10px}
+.opt{position:relative; text-align:left; cursor:pointer; border:1.5px solid var(--line); padding:15px 18px 15px 56px; background:var(--panel2);
+  font-family:var(--body); font-size:15px; color:var(--white); transition:.16s; line-height:1.4}
+.opt:hover:not(.locked){border-color:var(--y); transform:translateX(3px)}
+.opt .key{position:absolute; left:0; top:0; bottom:0; width:42px; display:grid; place-items:center; font-family:var(--disp); font-size:17px;
+  color:var(--muted); border-right:1.5px solid var(--line); transition:.16s}
+.opt.locked{cursor:default}
+.opt.correct{border-color:var(--y); background:rgba(255,229,0,.14)}
+.opt.correct .key{background:var(--y); color:var(--ink); border-color:var(--y)}
+.opt.wrong{border-color:var(--bad); background:rgba(255,90,90,.08); opacity:.85}
+.opt.wrong .key{background:var(--bad); color:#1a0606; border-color:var(--bad)}
+.expl{margin-top:20px; max-height:0; overflow:hidden; opacity:0; border-left:3px solid transparent; transition:.4s ease}
+.expl.show{max-height:360px; opacity:1; padding:14px 16px; background:var(--panel2); border-left-color:var(--y)}
+.expl .h{font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:7px; color:var(--y)}
+.expl .h.no{color:var(--bad)}
+.expl p{font-size:14.5px; color:var(--white); line-height:1.6}
+.qnext{display:flex; justify-content:flex-end; margin-top:20px}
+.btn{cursor:pointer; border:1.5px solid var(--y); background:var(--y); color:var(--ink); padding:15px 30px; font-family:var(--disp);
+  font-size:17px; text-transform:uppercase; letter-spacing:.5px; transition:.18s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent; color:var(--white); border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--y)}
+.btn[disabled]{opacity:.35; cursor:not-allowed; transform:none; border-color:var(--line); background:transparent; color:var(--muted)}
+
+/* summary */
+.sumCard{max-width:560px; margin:0 auto; text-align:center; border:1.5px solid var(--line); background:var(--panel); padding:0 0 36px; overflow:hidden}
+.sumCard .band{height:14px; margin-bottom:30px}
+.sumCard .big{font-family:var(--disp); font-size:96px; line-height:.9; color:var(--y)}
+.sumCard h3{font-family:var(--disp); font-size:26px; text-transform:uppercase; margin:14px 24px 8px}
+.sumCard .sub{color:var(--muted); margin:0 30px 26px; font-size:14px}
+.sumStats{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin:0 24px 26px; border:1.5px solid var(--line)}
+.sumStats .pill{border-right:1.5px solid var(--line)} .sumStats .pill:last-child{border-right:none}
+.sumBtns{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; padding:0 24px}
+
+/* rules */
+.ruleWrap{display:flex; flex-direction:column; gap:14px; max-width:820px; margin:0 auto}
+.rblock{border:1.5px solid var(--line); background:var(--panel)}
+.rblock .rh{padding:18px 22px; display:flex; gap:14px; align-items:center; cursor:pointer}
+.rblock .rh .bd{width:42px; height:42px; flex:none; display:grid; place-items:center; background:var(--y); color:var(--ink); font-family:var(--disp); font-size:16px; transform:rotate(-3deg)}
+.rblock .rh .tx h4{font-family:var(--disp); font-size:17px; text-transform:uppercase; line-height:1}
+.rblock .rh .tx span{font-family:var(--mono); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted)}
+.rblock .rh .arr{margin-left:auto; color:var(--y); font-size:20px; transition:.3s; font-family:var(--disp)}
+.rblock.open .rh .arr{transform:rotate(90deg)}
+.rbody{max-height:0; overflow:hidden; transition:max-height .45s ease}
+.rblock.open .rbody{max-height:2600px}
+.rbody .inner{padding:0 22px 22px}
+.formula{margin-bottom:16px; padding:16px 18px; border:1.5px dashed var(--y); background:rgba(255,229,0,.05);
+  font-family:var(--disp); font-size:15px; text-transform:uppercase; text-align:center; line-height:1.5; letter-spacing:.4px}
+.golden li,.warn li{list-style:none; padding:9px 0 9px 26px; position:relative; font-size:14.5px; border-bottom:1px solid var(--line2); line-height:1.5}
+.golden li:before{content:"★"; position:absolute; left:0; color:var(--y)}
+.warn li:before{content:"✗"; position:absolute; left:0; color:var(--bad); font-weight:800}
+.lh{font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--y); margin:16px 0 4px}
+
+/* toast */
+.pop{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(30px); z-index:60;
+  background:var(--y); color:var(--ink); font-family:var(--disp); font-size:17px; text-transform:uppercase; letter-spacing:.5px;
+  padding:13px 26px; box-shadow:6px 6px 0 rgba(255,229,0,.2); opacity:0; transition:.3s; pointer-events:none}
+.pop.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+.foot{text-align:center; margin-top:60px; font-family:var(--mono); color:var(--muted2); font-size:11px; letter-spacing:.5px; line-height:1.8}
+.reset{color:var(--muted); text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--mono); font-size:11px}
+
+@media (max-width:780px){
+  .modes{grid-template-columns:1fr}
+  .mode{border-right:none; border-bottom:1.5px solid var(--line)}
+  .mode:last-child{border-bottom:none}
+  .mode .num{margin-bottom:14px}
+  .sumStats{grid-template-columns:repeat(2,1fr)}
+  .sumStats .pill:nth-child(2){border-right:none}
+  .sumStats .pill:nth-child(1),.sumStats .pill:nth-child(2){border-bottom:1.5px solid var(--line)}
+  .face{padding:30px 22px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <div class="brand" onclick="go('home')">
+      <div class="crest">Δ</div>
+      <div><h1>Delta&nbsp;M1</h1><p>Road to 200</p></div>
+    </div>
+    <div class="xpchip" onclick="go('home')"><span>XP</span><b id="xpVal">0</b></div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home" class="screen active">
+    <div class="hero">
+      <span class="kicker rise">◆ Cambridge · Module 1 · Mastery Engine</span>
+      <h2 class="rise" style="animation-delay:.05s">Drill<br>every<br><em>answer.</em></h2>
+      <p class="sub rise" style="animation-delay:.12s">The whole Memorization Booklet, broken into <b>single, testable cards</b> and exam style challenges. One phrase, one question, one answer. Flip, recall, lock it in.</p>
+    </div>
+
+    <div class="goal rise" style="animation-delay:.18s">
+      <div class="gh"><span>Mastery toward your goal</span><b><i id="goalNow">0</i> / 200</b></div>
+      <div class="track"><div class="fill" id="goalFill"></div></div>
+      <small id="goalMsg">Every card you master and every correct answer pushes the meter up.</small>
+    </div>
+
+    <div class="modes rise" style="animation-delay:.24s">
+      <button class="mode" onclick="openMode('flash')">
+        <span class="num">01</span><span class="tagn" id="cntFlash"></span>
+        <div class="ic">🃏</div><h3>Flash<br>cards</h3>
+        <p>One item per card. Recall what it does, then flip to check.</p>
+      </button>
+      <button class="mode" onclick="openMode('quiz')">
+        <span class="num">02</span><span class="tagn" id="cntQuiz"></span>
+        <div class="ic">⚔️</div><h3>Chall<br>enge</h3>
+        <p>Exam style situations. Pick the correct Cambridge answer.</p>
+      </button>
+      <button class="mode" onclick="openMode('rules')">
+        <span class="num">03</span>
+        <div class="ic">📜</div><h3>Golden<br>rules</h3>
+        <p>Formulas, house style and the traps Cambridge penalises.</p>
+      </button>
+    </div>
+
+    <div class="shead"><h3 id="pickHd">Pick a Section</h3><div class="ln"></div><span class="pin" id="pinHint"></span></div>
+    <div class="secgrid" id="secGrid"></div>
+
+    <div class="foot">
+      Built from your DELTA M1 Memorization Booklet<br>Paper 1 · Tasks 3 4 5 &nbsp;|&nbsp; Paper 2 · Tasks 1 2<br><br>
+      <button class="reset" onclick="resetAll()">reset all progress</button>
+    </div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section id="flash" class="screen">
+    <div class="pbar"><span class="back" onclick="go('home')">← back</span>
+      <div class="ptitle"><small>Flashcards</small><span id="fcTitle"></span></div></div>
+    <div class="prog"><i id="fcProg"></i></div>
+    <div class="fcStage">
+      <div class="fcard" id="fcard" onclick="flipCard()">
+        <div class="face front">
+          <div class="lab" id="fcLab"></div>
+          <div class="prompt" id="fcPrompt"></div>
+          <div class="q" id="fcQ"></div>
+          <div class="hint">tap to reveal answer</div>
+        </div>
+        <div class="face back">
+          <div class="lab">The answer</div>
+          <div class="a" id="fcA"></div>
+          <div class="hint">tap to flip back</div>
+        </div>
+      </div>
+    </div>
+    <div class="fcBtns">
+      <button class="fbtn again" onclick="markCard(false)">↻ Again</button>
+      <button class="fbtn got" onclick="markCard(true)">✓ Got it</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="screen">
+    <div class="pbar"><span class="back" onclick="go('home')">← back</span>
+      <div class="ptitle"><small>Challenge</small><span id="qzTitle"></span></div></div>
+    <div class="prog"><i id="qzProg"></i></div>
+    <div class="qStage">
+      <div class="qScore">
+        <div class="pill"><b id="qScoreV">0</b><span>Score</span></div>
+        <div class="pill streak"><b id="qStreakV">0</b><span>Streak 🔥</span></div>
+        <div class="pill"><b id="qNumV">1</b><span>Question</span></div>
+      </div>
+      <div class="qcard" id="qCard"></div>
+      <div class="qnext"><button class="btn" id="qNextBtn" onclick="nextQ()" disabled>Choose an answer</button></div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="summary" class="screen">
+    <div class="sumCard">
+      <div class="band tape"></div>
+      <div class="big" id="sumPct">0%</div>
+      <h3 id="sumTitle">Round complete</h3>
+      <p class="sub" id="sumSub"></p>
+      <div class="sumStats">
+        <div class="pill"><b id="sumCorrect">0</b><span>Correct</span></div>
+        <div class="pill"><b id="sumTotal">0</b><span>Questions</span></div>
+        <div class="pill streak"><b id="sumBest">0</b><span>Best streak</span></div>
+        <div class="pill"><b id="sumXp">0</b><span>XP earned</span></div>
+      </div>
+      <div class="sumBtns">
+        <button class="btn" onclick="restartQuiz()">↻ Run it again</button>
+        <button class="btn ghost" onclick="go('home')">New section</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RULES -->
+  <section id="rules" class="screen">
+    <div class="pbar"><span class="back" onclick="go('home')">← back</span>
+      <div class="ptitle"><small>Golden Rules</small><span>House style &amp; formulas</span></div></div>
+    <div class="ruleWrap" id="ruleWrap"></div>
+  </section>
+</div>
+<div class="pop" id="pop"></div>
+
+<script>
+/* ============ STORAGE ============ */
+var mem={};
+function load(){try{var r=localStorage.getItem('deltaM1v2');return r?JSON.parse(r):null;}catch(e){return mem.s||null;}}
+function save(o){try{localStorage.setItem('deltaM1v2',JSON.stringify(o));}catch(e){mem.s=o;}}
+var stats=load()||{xp:0,mastered:{},answered:0,correct:0};
+function persist(){save(stats);refreshXP();}
+var S={mode:null,sec:null,deck:[],i:0,flipped:false,quiz:[],qi:0,score:0,streak:0,best:0,xpRound:0,locked:false};
+
+/* ============ NAV ============ */
+function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+function refreshXP(){
+  document.getElementById('xpVal').textContent=stats.xp;
+  var shown=Math.min(200,Math.round(stats.xp/9));
+  document.getElementById('goalNow').textContent=shown;
+  document.getElementById('goalFill').style.width=(shown/200*100)+'%';
+  var m=document.getElementById('goalMsg');
+  if(shown>=200)m.textContent="Full marks on the meter. The wording is instinct now. Go and do it for real.";
+  else if(shown>=150)m.textContent="Distinction territory. The phrasing comes without thinking.";
+  else if(shown>=90)m.textContent="Solid Pass and climbing. Keep recycling the cards you miss.";
+  else if(shown>0)m.textContent="Momentum building. Every mastered card lifts the meter.";
+}
+function awardXP(n){stats.xp+=n;S.xpRound+=n;persist();}
+function pop(t){var p=document.getElementById('pop');p.textContent=t;p.classList.add('show');clearTimeout(pop._t);pop._t=setTimeout(function(){p.classList.remove('show');},1200);}
+
+/* ============ CARD GENERATION ============ */
+function buildDecks(){
+  DATA.sections.forEach(function(s){
+    s.flashcards=[];
+    (s.decks||[]).forEach(function(d){
+      (d.items||[]).forEach(function(it){s.flashcards.push({front:it,back:d.def,prompt:d.prompt,tag:d.name,longF:it.length>40,longB:(d.def||'').length>22});});
+      (d.pairs||[]).forEach(function(p){s.flashcards.push({front:p[0],back:p[1],prompt:d.prompt,tag:d.name,longF:p[0].length>40,longB:p[1].length>22});});
+    });
+  });
+}
+
+/* ============ HOME ============ */
+function buildHome(){
+  var grid=document.getElementById('secGrid');grid.innerHTML='';
+  var totF=0,totQ=0;DATA.sections.forEach(function(s){totF+=s.flashcards.length;totQ+=s.quiz.length;});
+  document.getElementById('cntFlash').textContent=totF+' cards';
+  document.getElementById('cntQuiz').textContent=totQ+' questions';
+  var all={id:'all',code:'Full booklet',title:'Everything',badge:'ALL',all:true};
+  [all].concat(DATA.sections).forEach(function(s){
+    var fc=s.all?totF:s.flashcards.length,qc=s.all?totQ:s.quiz.length;
+    var el=document.createElement('div');el.className='sec'+(s.all?' all':'');
+    el.onclick=function(){chooseSection(s.id);};
+    el.innerHTML='<div class="badge">'+(s.badge||'')+'</div><div class="meta"><div class="code">'+s.code+'</div>'+
+      '<h4>'+s.title+'</h4><div class="count">'+fc+' cards · '+qc+' challenges</div></div>';
+    grid.appendChild(el);
+  });
+}
+function openMode(m){S.mode=m;if(m==='rules'){buildRules();go('rules');return;}
+  document.getElementById('pickHd').textContent=m==='flash'?'Flashcards · Pick a Section':'Challenge · Pick a Section';
+  document.getElementById('pinHint').textContent=m==='flash'?'choose a task ↓':'choose a task ↓';
+  go('home');document.querySelector('.shead').scrollIntoView({behavior:'smooth',block:'start'});}
+function chooseSection(id){S.sec=id;if(!S.mode)S.mode='flash';if(S.mode==='flash')startFlash(id);else startQuiz(id);}
+function gather(id,key){if(id==='all'){var a=[];DATA.sections.forEach(function(s){a=a.concat(s[key].map(function(x){return Object.assign({_sec:s.code,_color:s.color},x);}));});return a;}
+  var sec=DATA.sections.find(function(s){return s.id===id;});return sec[key].map(function(x){return Object.assign({_sec:sec.code},x);});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function secName(id){if(id==='all')return'Full booklet';return DATA.sections.find(function(x){return x.id===id;}).code;}
+
+/* ============ FLASHCARDS ============ */
+function startFlash(id){S.deck=shuffle(gather(id,'flashcards'));S.i=0;S.flipped=false;
+  document.getElementById('fcTitle').textContent=secName(id);go('flash');renderCard();}
+function renderCard(){var c=S.deck[S.i];if(!c)return;
+  document.getElementById('fcard').classList.remove('flip');S.flipped=false;
+  document.getElementById('fcLab').textContent=c._sec+' · '+c.tag;
+  document.getElementById('fcPrompt').textContent=c.prompt||'';
+  var q=document.getElementById('fcQ');q.innerHTML=c.front;q.className='q'+(c.longF?' sm':'');
+  var a=document.getElementById('fcA');a.innerHTML=c.back;a.className='a'+(c.longB?' sm':'');
+  document.getElementById('fcProg').style.width=(S.i/S.deck.length*100)+'%';}
+function flipCard(){S.flipped=!S.flipped;document.getElementById('fcard').classList.toggle('flip',S.flipped);}
+function markCard(got){var c=S.deck[S.i];
+  if(got){var key=c.tag+'|'+c.front;if(!stats.mastered[key]){stats.mastered[key]=1;awardXP(4);}pop('✓ +4 XP');}
+  else{S.deck.push(c);}
+  S.i++;if(S.i>=S.deck.length){flashDone();return;}renderCard();}
+function flashDone(){document.getElementById('fcProg').style.width='100%';
+  document.getElementById('fcPrompt').textContent='';
+  document.getElementById('fcQ').innerHTML='Deck complete';document.getElementById('fcQ').className='q';
+  document.getElementById('fcA').innerHTML='Nice work';setTimeout(function(){go('home');},1000);}
+
+/* ============ QUIZ ============ */
+function startQuiz(id){S.quiz=shuffle(gather(id,'quiz'));S.qi=0;S.score=0;S.streak=0;S.best=0;S.xpRound=0;S.locked=false;
+  document.getElementById('qzTitle').textContent=secName(id);go('quiz');renderQ();}
+function renderQ(){S.locked=false;var q=S.quiz[S.qi];
+  document.getElementById('qScoreV').textContent=S.score;document.getElementById('qStreakV').textContent=S.streak;
+  document.getElementById('qNumV').textContent=(S.qi+1)+'/'+S.quiz.length;
+  document.getElementById('qzProg').style.width=(S.qi/S.quiz.length*100)+'%';
+  var keys=['A','B','C','D','E'];
+  var html='<div class="qtag">'+q._sec+(q.skill?' · '+q.skill:'')+'</div>';
+  if(q.scen)html+='<div class="scen">'+q.scen+'</div>';
+  html+='<div class="qtext">'+q.q+'</div><div class="opts">';
+  q.options.forEach(function(o,k){html+='<button class="opt" onclick="answer('+k+')"><span class="key">'+keys[k]+'</span>'+o+'</button>';});
+  html+='</div><div class="expl" id="expl"><div class="h" id="explH"></div><p id="explP"></p></div>';
+  document.getElementById('qCard').innerHTML=html;
+  var nb=document.getElementById('qNextBtn');nb.disabled=true;nb.textContent='Choose an answer';nb.classList.add('ghost');}
+function answer(k){if(S.locked)return;S.locked=true;var q=S.quiz[S.qi];var correct=q.answer;
+  var opts=document.querySelectorAll('#qCard .opt');opts.forEach(function(o){o.classList.add('locked');});
+  opts[correct].classList.add('correct');stats.answered++;
+  if(k===correct){S.score++;S.streak++;if(S.streak>S.best)S.best=S.streak;stats.correct++;
+    var gain=10+(S.streak>=3?5:0);awardXP(gain);pop(S.streak>=3?('🔥 x'+S.streak+'  +'+gain+' XP'):('✓ +'+gain+' XP'));}
+  else{opts[k].classList.add('wrong');S.streak=0;}
+  persist();var e=document.getElementById('expl');
+  document.getElementById('explH').innerHTML=(k===correct?'✓ Correct · why':'✗ Not quite · why');
+  document.getElementById('explH').className='h'+(k===correct?'':' no');
+  document.getElementById('explP').innerHTML=q.explain;e.classList.add('show');
+  document.getElementById('qScoreV').textContent=S.score;document.getElementById('qStreakV').textContent=S.streak;
+  var nb=document.getElementById('qNextBtn');nb.disabled=false;nb.classList.remove('ghost');
+  nb.textContent=(S.qi+1>=S.quiz.length)?'See results →':'Next →';}
+function nextQ(){S.qi++;if(S.qi>=S.quiz.length){quizDone();return;}renderQ();}
+function quizDone(){var pct=Math.round(S.score/S.quiz.length*100);
+  document.getElementById('qzProg').style.width='100%';document.getElementById('sumPct').textContent=pct+'%';
+  document.getElementById('sumCorrect').textContent=S.score;document.getElementById('sumTotal').textContent=S.quiz.length;
+  document.getElementById('sumBest').textContent=S.best;document.getElementById('sumXp').textContent=S.xpRound;
+  var t,sub;
+  if(pct===100){t="Flawless · 200 energy";sub="Every answer Cambridge perfect. This is exactly the instinct you want in the exam.";}
+  else if(pct>=80){t="Distinction level";sub="Strong control of the wording. Review the few you missed and lock them in.";}
+  else if(pct>=60){t="Comfortable pass";sub="The framework is there. Recycle this set until the slips disappear.";}
+  else{t="Honest start";sub="This is what practice is for. Run the flashcards for this task, then come back.";}
+  document.getElementById('sumTitle').textContent=t;document.getElementById('sumSub').textContent=sub;go('summary');}
+function restartQuiz(){startQuiz(S.sec);}
+
+/* ============ RULES ============ */
+function buildRules(){var w=document.getElementById('ruleWrap');w.innerHTML='';
+  DATA.sections.forEach(function(s,idx){var b=document.createElement('div');b.className='rblock'+(idx===0?' open':'');
+    var inner='<div class="formula">'+s.formula+'</div>';
+    if(s.golden&&s.golden.length){inner+='<div class="lh">Golden rules</div><ul class="golden">';s.golden.forEach(function(g){inner+='<li>'+g+'</li>';});inner+='</ul>';}
+    if(s.warn&&s.warn.length){inner+='<div class="lh">Cambridge penalises</div><ul class="warn">';s.warn.forEach(function(g){inner+='<li>'+g+'</li>';});inner+='</ul>';}
+    b.innerHTML='<div class="rh" onclick="this.parentNode.classList.toggle(\'open\')"><div class="bd">'+s.badge+'</div>'+
+      '<div class="tx"><span>'+s.code+'</span><h4>'+s.title+'</h4></div><div class="arr">›</div></div>'+
+      '<div class="rbody"><div class="inner">'+inner+'</div></div>';
+    w.appendChild(b);});}
+
+/* ============ RESET ============ */
+function resetAll(){if(!confirm('Reset all XP, mastered cards and stats? This cannot be undone.'))return;
+  stats={xp:0,mastered:{},answered:0,correct:0};persist();pop('Progress reset');}
+
+/* ============ DATA ============ */
+var DATA={sections:[
+/* ===== SECTION 1: PAPER 1 TASK 3 ===== */
+{
+id:'p1t3', code:'Paper 1 · Task 3', title:'Functions of Language', badge:'T3',
+formula:`Feature = noun phrase + (for function) &nbsp;•&nbsp; Example = a full sentence`,
+golden:[`Pick 3 <b>different</b> areas: grammatical, functional, lexical, sub-skills, discourse.`,`Label functions as "Language to / Language for…".`,`In grammar give one verb form + one non-verb form.`,`Lexis = chunks and collocations, never single words.`,`Phonology always in /IPA/ slashes.`,`Every example is a full sentence tied to the task.`],
+warn:[`"asking and answering questions" — too vague.`,`"adjacency pairs" — too vague.`,`"turn-taking" alone — too general.`,`"present simple" alone — below B1.`,`"discourse markers" alone — name the function.`,`Nodding, eye contact — paralinguistic, not language.`,`Fragment examples like "nervous" — write a full sentence.`],
+decks:[
+{name:'Polite requests', prompt:'What function does this phrase serve?', def:'Making a polite request', items:[`Could you possibly + verb…?`,`Would you mind + V-ing…?`,`I was wondering if you could…`,`Do you think you could…?`,`I'd appreciate it if you could…`,`Would it be possible to…?`,`If it's not too much trouble, could you…?`]},
+{name:'Apologising', prompt:'What function does this phrase serve?', def:'Apologising', items:[`I'm terribly sorry for / about…`,`I do apologise for…`,`Please accept my sincerest apologies for…`,`I'd like to apologise for…`,`I owe you an apology for…`]},
+{name:'Suggesting', prompt:'What function does this phrase serve?', def:'Making a suggestion', items:[`How about + V-ing…?`,`Why don't we…?`,`Shall we…?`,`We could / might…`,`What if we…?`,`It might be a good idea to…`,`Have you thought about + V-ing…?`]},
+{name:'Giving advice', prompt:'What function does this phrase serve?', def:'Giving advice', items:[`If I were you, I'd…`,`You should / ought to…`,`I'd recommend + V-ing…`,`You'd better…`,`You might want to…`,`It would be wise to…`]},
+{name:'Bargaining', prompt:'What function does this phrase serve?', def:'Bargaining / negotiating a price', items:[`Would you take… for it?`,`I can't go any lower than…`,`If you give me… I'll…`,`How about we meet halfway at…?`,`That's my best offer.`,`Can you do any better than that?`,`I'll throw in… as well.`]},
+{name:'Prices', prompt:'What function does this phrase serve?', def:'Asking for / giving prices', items:[`How much do you want for it?`,`What's the asking price?`,`I'm looking for around…`,`It's yours for…`,`I can let you have it for…`,`It's a bargain at that price.`]},
+{name:'Opinion', prompt:'What function does this phrase serve?', def:'Expressing an opinion', items:[`In my opinion / view…`,`From my point of view…`,`It seems to me that…`,`As far as I'm concerned…`,`I'd say that…`,`Personally, I feel…`,`To my mind…`]},
+{name:'Agreeing', prompt:'What function does this phrase serve?', def:'Agreeing', items:[`I couldn't agree more.`,`Absolutely.`,`You're absolutely right.`,`That's exactly what I think.`]},
+{name:'Disagreeing', prompt:'What function does this phrase serve?', def:'Disagreeing (politely)', items:[`I'm afraid I can't agree.`,`I see your point, but…`,`I beg to differ.`,`I don't quite see it that way.`,`With respect, I think…`]},
+{name:'Certainty', prompt:'What function does this phrase serve?', def:'Expressing certainty / deduction', items:[`It must be…`,`There's no doubt that…`,`I'm absolutely sure…`,`He must have left already.`]},
+{name:'Possibility', prompt:'What function does this phrase serve?', def:'Expressing possibility / doubt', items:[`It might / may / could…`,`It's possible that…`,`Perhaps…`,`She might have forgotten.`,`It can't be…`,`There's no way…`]},
+{name:'Holding the floor', prompt:'What function does this phrase serve?', def:'Holding the floor (turn-taking)', items:[`Just a moment…`,`If I could just finish…`,`Hang on a second…`]},
+{name:'Inviting contributions', prompt:'What function does this phrase serve?', def:'Inviting contributions (turn-taking)', items:[`What do you think, Sara?`,`Would you like to add anything?`,`Any thoughts?`]},
+{name:'Interrupting', prompt:'What function does this phrase serve?', def:'Interrupting', items:[`Sorry to interrupt, but…`,`Could I just come in here?`,`If I may…`]},
+{name:'Back-channelling', prompt:'What function does this serve?', def:'Back-channelling', items:[`Mm-hm`,`Right`,`I see`,`Oh really?`]},
+{name:'Fillers', prompt:'What function does this serve?', def:'Fillers / hesitation devices', items:[`Well…`,`You know…`,`I mean…`,`Sort of…`,`Kind of…`]},
+{name:'Time creators', prompt:'What function does this phrase serve?', def:'Time-creating device', items:[`Let me think…`,`That's a good question…`,`How can I put this…`]},
+{name:'Clarifying', prompt:'What function does this phrase serve?', def:'Asking for clarification', items:[`What do you mean by…?`,`Sorry, I don't quite follow.`,`Could you elaborate on that?`,`Are you saying that…?`,`If I understand you correctly…`,`In other words…`]},
+{name:'Inviting', prompt:'What function does this phrase serve?', def:'Inviting', items:[`Would you like to…?`,`How about coming to…?`,`We'd love it if you could…`]},
+{name:'Accepting', prompt:'What function does this phrase serve?', def:'Accepting an invitation', items:[`I'd love to.`,`That sounds great.`,`Count me in.`]},
+{name:'Refusing', prompt:'What function does this phrase serve?', def:'Refusing / declining', items:[`I'd love to, but…`,`I'm afraid I can't.`,`Unfortunately I'm tied up.`]},
+{name:'Complaining', prompt:'What function does this phrase serve?', def:'Complaining', items:[`I'm afraid I have to complain about…`,`I'm not at all satisfied with…`,`I'd like to draw your attention to…`,`This really isn't good enough.`]},
+{name:'Reassuring', prompt:'What function does this phrase serve?', def:'Reassuring / handling a complaint', items:[`Rest assured that…`,`We'll look into it right away.`,`Please accept our apologies.`]},
+{name:'Persuading', prompt:'What function does this phrase serve?', def:'Persuading / recommending', items:[`Surely you can see that…`,`You must agree that…`,`Just think how…`,`It would be a real shame not to…`,`I can't recommend it highly enough.`,`You'd be mad to miss…`]},
+{name:'Warning', prompt:'What function does this phrase serve?', def:'Warning', items:[`Be careful not to…`,`You'd better not…`,`Make sure you don't…`,`Whatever you do, don't…`,`Watch out for…`]},
+{name:'Promising', prompt:'What function does this phrase serve?', def:'Promising', items:[`I promise that…`,`I give you my word that…`,`You have my assurance that…`,`You can count on me to…`]},
+{name:'Sequencing', prompt:'What function does this phrase serve?', def:'Sequencing / narrating past events', items:[`It all started when…`,`First… Then… After that…`,`No sooner had I… than…`,`The moment…`,`Out of the blue…`,`In the end…`]},
+{name:'Describing', prompt:'What function does this phrase serve?', def:'Describing people / places / objects', items:[`It's shaped like…`,`It's the kind of thing you use for…`,`It looks / seems / appears to be…`,`It's got a sort of… feel to it.`,`It reminds me of…`]},
+{name:'Greetings', prompt:'What function does this phrase serve?', def:'Greeting / opening', items:[`How do you do?`,`Pleased to meet you.`,`Nice to see you again.`]},
+{name:'Small talk', prompt:'What function does this phrase serve?', def:'Opening small talk', items:[`How was your weekend?`,`Did you get up to much yesterday?`]},
+{name:'Leave-taking', prompt:'What function does this phrase serve?', def:'Leave-taking / closing', items:[`I'd better be off.`,`I'll let you get on.`,`Look after yourself.`]},
+{name:'Grammar use', prompt:'What is this form typically used for?', pairs:[[`Used to / would`,`Past habits / states`],[`Past simple + past continuous`,`Storytelling`],[`Past simple + past perfect`,`Storytelling with flashback`],[`Past simple`,`Completed past actions`],[`Past continuous`,`Background / interrupted action`],[`Past perfect`,`Events before the main past event`],[`Present perfect`,`Past action with present relevance`],[`Present perfect continuous`,`Unfinished actions of duration`],[`Present simple`,`Procedures, routines, facts`],[`Present continuous`,`Current temporary activities, plans`],[`Going to / will`,`Future plans and predictions`],[`First conditional`,`Offers, bargaining, possible outcomes`],[`Second conditional`,`Hypothetical present / future`],[`Third conditional`,`Past hypothetical / regret`],[`Modals: must, can't, might`,`Deduction about past / present`],[`Modals: must, have to, should`,`Rules and advice`],[`Modals: can, could, be able to`,`Ability past / present / future`],[`Passive voice`,`Processes, news, formal style`],[`Indirect / embedded questions`,`Polite enquiry`],[`Tag questions`,`Confirmation seeking`],[`Comparatives`,`Comparing prices / options`],[`Superlatives`,`Highlighting outstanding qualities`],[`Quantifiers (much, many)`,`Quantities and prices`],[`Relative clauses`,`Adding detail to nouns`],[`Participle clauses`,`Succinct information packaging`],[`Reported speech`,`Relaying what others said`],[`Inversion after negatives`,`Emphatic / literary style`]]},
+{name:'Lexical set', prompt:'Which lexical set is this?', pairs:[[`was born, grew up, married, retired`,`Topic lexis: life-story`],[`asking price, knock down, throw in, haggle`,`Lexis of buying / selling`],[`thrilled, devastated, gutted, relieved`,`Adjectives for feelings`],[`bustling, picturesque, breathtaking`,`Adjectives for places`],[`easy-going, down-to-earth, witty`,`Adjectives for character`],[`shortly after, by the time, in those days`,`Time / place adverbials`],[`outstanding, world-class, exceptional`,`Evaluative / positive adjectives`],[`absolutely, utterly, totally`,`Emotive / emphatic lexis`],[`sort of, kind of, more or less, a bit`,`Hedging / vague language`],[`anyway, mind you, the thing is`,`Informal discourse markers`],[`moreover, furthermore, consequently`,`Formal discourse markers`],[`make a decision, do business, take a chance`,`Collocations (make/do/take/have)`],[`get on with, get over, get round to`,`Phrasal verbs (with "get")`],[`a piece of cake, hit the nail on the head`,`Idioms / fixed expressions`],[`rush hour, parking ticket, mission statement`,`Compound nouns`]]},
+{name:'Phonology', prompt:'Which phonological feature is this?', pairs:[[`comFORtable, deCISion`,`Word stress on key lexis`],[`content words stressed, function words weak`,`Sentence stress`],[`of /əv/, to /tə/, for /fə/`,`Weak forms / schwa`],[`writers of → /raɪtəzəv/`,`Catenation / linking (C+V)`],[`you are → /jʊwə/`,`Intrusive /w/`],[`are among → /ərəmʌŋ/`,`Linking / intrusive /r/`],[`/t/ in "get back" → /ʔ/`,`Assimilation`],[`/t/ dropped in "isn't it"`,`Elision`],[`you're, we'll, he'd've`,`Contractions`],[`↗ "Have you finished?"`,`Rising intonation (yes/no Q)`],[`↘ "Where do you live?"`,`Falling intonation (Wh- Q)`],[`I could come ↘↗ tomorrow?`,`Fall–rise (tentative)`]]},
+{name:'Receptive sub-skills', prompt:'Which sub-skill is this?', pairs:[[`identifying the main idea / general meaning`,`Reading/listening for gist`],[`locating specific facts`,`Reading/listening for specific information`],[`understanding precise meaning / nuance`,`Reading/listening for detail`],[`working out unknown lexis from co-text`,`Inferring meaning from context`],[`recognising stance / opinion / mood`,`Deducing speaker attitude`],[`activating schemata to anticipate`,`Predicting content from context`],[`distinguishing topic sentences from detail`,`Identifying main vs supporting ideas`],[`decoding weak forms, linking, elision`,`Recognising connected speech`],[`spotting formal vs informal cues`,`Identifying register / tone`]]},
+{name:'Productive sub-skills', prompt:'Which sub-skill is this?', pairs:[[`managing who speaks when`,`Turn-taking / managing interaction`],[`signalling structure in a monologue`,`Signposting in monologic discourse`],[`storytelling, presenting at length`,`Producing extended monologue`],[`organising writing into paragraphs`,`Paragraphing / discourse organisation`],[`drafting and self-correcting`,`Drafting and self-editing`],[`choosing formal / informal / neutral`,`Register appropriacy`]]},
+{name:'Too vague', prompt:'Why does Cambridge reject this?', pairs:[[`"asking and answering questions"`,`Rejected — too vague`],[`"adjacency pairs"`,`Rejected — too vague`],[`"opening and closing conversations"`,`Rejected — fits any conversation`],[`"turn-taking" (alone)`,`Rejected — too general`],[`"present simple" (alone)`,`Rejected — below B1 level`],[`"discourse markers" (alone)`,`Rejected — name the function`],[`nodding, eye contact`,`Rejected — paralinguistic, not language`],[`"nervous" as an example`,`Rejected — fragment, write a sentence`]]}
+],
+quiz:[
+{q:`Which is a correctly written Task 3 feature?`,scen:`Activity: learners negotiate buying a second-hand item at a market.`,options:[`Language to bargain (use of <i>will</i> to make offers)`,`The learner uses the first conditional to bargain.`,`Bargaining is negotiating a price.`,`They should learn to buy things.`],answer:0,explain:`A feature is a noun phrase with its function in brackets. B is the example, C a definition, D too vague.`},
+{q:`Correct example for "First conditional (for offers)"?`,options:[`If you take both, I'll do them for fifty euros.`,`First conditional for offers`,`offers and bargaining`,`will / if`],answer:0,explain:`Examples are always full sentences tied to the task.`},
+{q:`Which label is too vague?`,options:[`Asking and answering questions`,`Polite requests using indirect questions`,`Language to bargain`,`Time linkers for narrative`],answer:0,explain:`"Asking and answering questions" is explicitly rejected as too vague.`},
+{q:`Which should never be offered as a language feature?`,options:[`Paralinguistic features such as nodding`,`Weak forms and schwa`,`Topic-related collocations`,`Turn-taking exponents`],answer:0,explain:`Nodding and eye contact are paralinguistic, not language.`},
+{q:`In the grammar area, Cambridge wants…`,options:[`one verb form and one non-verb form`,`three verb tenses`,`only modals`,`two present simples`],answer:0,explain:`The variety rule asks for one verb form plus one non-verb form.`},
+{q:`Which belongs to bargaining?`,options:[`How about we meet halfway at forty?`,`I'm terribly sorry for the delay.`,`Could you elaborate on that?`,`No sooner had we sat down…`],answer:0,explain:`Meeting halfway is a negotiating move; the others are apologising, clarifying and narrating.`},
+{q:`How must phonology features be written?`,options:[`in /phonemic transcription/ between slashes`,`in capitals`,`in plain spelling`,`with stress numbers only`],answer:0,explain:`No credit for phonology without IPA in slashes.`},
+{q:`"present simple" alone is rejected because…`,options:[`it is below B1 and below most candidates`,`it is not a real tense`,`it cannot be exemplified`,`it is only spoken`],answer:0,explain:`Cambridge notes it is below the level of most candidates.`},
+{q:`Which set asks for clarification?`,options:[`Are you saying that…? / Could you elaborate?`,`If I were you, I'd… / You'd better…`,`Rest assured that…`,`Shall we…? / Why don't we…?`],answer:0,explain:`Those check meaning; the rest are advice, reassuring and suggesting.`},
+{q:`Best grammar for a storytelling task?`,options:[`Narrative tenses: past simple + past continuous`,`First conditional`,`Indirect questions`,`Superlatives`],answer:0,explain:`Narrative tenses carry storytelling.`},
+{q:`For lexical features Cambridge wants…`,options:[`chunks and collocations shown in an utterance`,`a long list of single words`,`only phrasal verbs`,`word-order rules`],answer:0,explain:`Lexis means chunks and collocations in context.`},
+{q:`"To my mind, the plan works" serves which function?`,options:[`Expressing an opinion`,`Apologising`,`Warning`,`Promising`],answer:0,explain:`"To my mind" introduces an opinion.`}
+]
+},
+/* ===== SECTION 2: PAPER 1 TASK 4 ===== */
+{
+id:'p1t4', code:'Paper 1 · Task 4', title:'Strengths & Weaknesses', badge:'T4',
+formula:`Criterion → Point (noun phrase) → Example (quoted, with line ref)`,
+golden:[`Strength = [quality adj] + use of + [feature].`,`Weakness = [problem noun] of + [feature].`,`Every point is a noun phrase, never "the learner is good at…".`,`The criterion must be the exact rubric wording.`,`Every example is quoted from the text with a line reference.`],
+warn:[`"The learner was good at the present simple" — name the feature.`,`"Good vocabulary" — say "Use of collocations / topic lexis".`,`Naming only the criterion without the feature.`,`Sentences instead of noun phrases.`,`Examples not taken from the learner text.`],
+decks:[
+{name:'Criterion', prompt:'Which criterion does this describe?', pairs:[[`whether the learner did what the task asked`,`Task achievement`],[`layout, paragraphing, logical flow`,`Organisation`],[`linkers, reference, substitution`,`Cohesion`],[`formality / appropriacy for the genre`,`Style / Register`],[`correct use of grammatical forms`,`Accuracy of grammar`],[`range / sophistication of grammar`,`Complexity of grammar`],[`correct word choice, spelling, collocation`,`Accuracy of lexis`],[`variety / sophistication of vocabulary`,`Complexity / Range of lexis`],[`commas, full stops, capitals`,`Punctuation`],[`stress, intonation, sounds (spoken)`,`Phonological features`]]},
+{name:'Strength · Organisation', prompt:'Strength or weakness — which criterion?', def:'Strength · Organisation', items:[`Logical / clear organisation`,`Use of title and sub-headings`,`Clear statement of aims at the start`,`Clear layout with separate paragraphs`,`Use of bullet points / numbering`,`Information presented in a logical order`,`Effective opening / closing paragraphs`]},
+{name:'Strength · Cohesion', prompt:'Strength or weakness — which criterion?', def:'Strength · Cohesion', items:[`Accurate use of linkers and the pattern that follows`,`Wide range of cohesive devices used effectively`,`Effective use of pronoun reference`,`Good use of substitution to avoid repetition`,`Accurate use of conjunctions to link clauses`,`Appropriate use of sequencing devices`]},
+{name:'Strength · Style', prompt:'Strength or weakness — which criterion?', def:'Strength · Style / Register', items:[`Appropriate level of formality maintained throughout`,`Consistent register`,`Polite tone`,`Use of conventions appropriate to the genre`]},
+{name:'Strength · Acc. grammar', prompt:'Strength or weakness — which criterion?', def:'Strength · Accuracy of grammar', items:[`Accurate use of complex clauses`,`Accurate use of passives`,`Good control of present perfect and past simple together`,`Accurate use of relative clauses`,`Accurate use of comparatives and superlatives`,`Accurate use of articles`,`Accurate use of prepositions`,`Accurate use of subject-verb agreement`,`Accurate use of conditional forms`,`Accurate use of reported speech`]},
+{name:'Strength · Complexity', prompt:'Strength or weakness — which criterion?', def:'Strength · Complexity of grammar', items:[`Good use of complex clauses`,`Some use of subordination`,`Use of defining and non-defining relative clauses`,`Some use of passive voice`,`Use of modal verbs for certainty`,`Use of cleft sentences for emphasis`,`Use of participle clauses`]},
+{name:'Strength · Acc. lexis', prompt:'Strength or weakness — which criterion?', def:'Strength · Accuracy of lexis', items:[`Accurate use of collocations`,`Accurate use of fixed expressions`,`Accurate use of topic-related lexis`,`Generally accurate spelling`,`Appropriate word choice for the context`]},
+{name:'Strength · Range lexis', prompt:'Strength or weakness — which criterion?', def:'Strength · Range of lexis', items:[`Some accurate and sophisticated collocations`,`Wide range of topic-related lexis`,`Effective use of idiomatic expressions`,`Use of lexical chunks / set phrases`,`Use of evaluative adjectives`,`Effective use of phrasal verbs`]},
+{name:'Strength · Punctuation', prompt:'Strength or weakness — which criterion?', def:'Strength · Punctuation', items:[`Accurate use of full stops and capitals`,`Accurate use of commas in lists`,`Appropriate use of question / exclamation marks`,`Accurate use of apostrophes`]},
+{name:'Strength · Task', prompt:'Strength or weakness — which criterion?', def:'Strength · Task achievement', items:[`The task has been fully completed`,`All parts of the task are addressed`,`Appropriate length for the task`,`Content relevant to the task`]},
+{name:'Weakness · Organisation', prompt:'Strength or weakness — which criterion?', def:'Weakness · Organisation', items:[`Wrongly paragraphed conclusion`,`Poor paragraphing / one-sentence paragraphs`,`Lack of clear introduction / conclusion`,`Information not in a logical order`,`No paragraph breaks / one block of text`,`Headings missing / inconsistent`]},
+{name:'Weakness · Cohesion', prompt:'Strength or weakness — which criterion?', def:'Weakness · Cohesion', items:[`Overuse of "and" to link clauses`,`Overuse of "but" / "so" / "because"`,`Lack of variety in linkers`,`Misuse of connectors ("although… but…")`,`Unclear pronoun reference`,`Excessive repetition rather than substitution`,`Missing linkers between sentences`]},
+{name:'Weakness · Style', prompt:'Strength or weakness — which criterion?', def:'Weakness · Style / Register', items:[`Inappropriate register for the genre`,`Inconsistent use of contractions`,`Informal lexis in a formal text`,`Inappropriate use of "I" in a formal article`,`Inconsistent formality throughout`]},
+{name:'Weakness · Acc. grammar', prompt:'Strength or weakness — which criterion?', def:'Weakness · Accuracy of grammar', items:[`Incorrect word order`,`Inversion in indirect questions`,`Misuse of articles`,`Misuse of prepositions`,`Past simple where past continuous is needed`,`Past simple where present perfect is needed`,`Confusion of present perfect and past simple`,`Wrong form of verb after a modal`,`Subject-verb agreement errors`,`Missing auxiliary in questions`,`Confusion of conditional forms`,`Wrong tense in reported speech`,`Wrong word form / part of speech`,`Confusion of countable and uncountable nouns`,`Wrong form of comparative / superlative`]},
+{name:'Weakness · Complexity', prompt:'Strength or weakness — which criterion?', def:'Weakness · Complexity of grammar', items:[`Lack of complex sentences`,`Overuse of coordination (no subordination)`,`Limited range of verb forms`,`No use of passive where appropriate`,`Lack of variety in sentence structure`]},
+{name:'Weakness · Acc. lexis', prompt:'Strength or weakness — which criterion?', def:'Weakness · Accuracy of lexis', items:[`Misuse of collocations`,`Misuse of dependent prepositions ("depend of")`,`Inaccurate spelling`,`Confusion of similar words (lend/borrow)`,`L1 interference / direct translation`,`False friends`,`Overgeneralisation ("goed", "childs")`,`Wrong word class ("He spoke fluent")`]},
+{name:'Weakness · Range lexis', prompt:'Strength or weakness — which criterion?', def:'Weakness · Range of lexis', items:[`Limited range of vocabulary`,`Overuse of high-frequency items (good, nice, big)`,`Lack of topic-specific lexis`,`Reliance on generic adjectives`,`No use of collocations`]},
+{name:'Weakness · Punctuation', prompt:'Strength or weakness — which criterion?', def:'Weakness · Punctuation', items:[`Capitalisation of ordinary nouns`,`Inaccurate use / omission of commas`,`Full stops instead of commas`,`Run-on sentences / comma splice`,`Missing capitals at sentence start`,`Wrong use of apostrophes`]},
+{name:'Weakness · Task', prompt:'Strength or weakness — which criterion?', def:'Weakness · Task achievement', items:[`Task not fully completed`,`Irrelevant content`,`Off-topic digressions`,`Text too short / too long`]},
+{name:'Phonology (spoken)', prompt:'Strength or weakness?', pairs:[[`Accurate word stress on key lexis`,`Strength · Phonology`],[`Appropriate sentence stress`,`Strength · Phonology`],[`Effective use of intonation`,`Strength · Phonology`],[`Use of weak forms / schwa`,`Strength · Phonology`],[`Wrong word stress (photoGRAPHer)`,`Weakness · Phonology`],[`Schwa not used in unstressed syllables`,`Weakness · Phonology`],[`Confusion of phonemes (ship/sheep)`,`Weakness · Phonology`],[`Flat, monotonous intonation`,`Weakness · Phonology`],[`L1 sounds substituted for L2`,`Weakness · Phonology`]]},
+{name:'Formulas', prompt:'What is this?', pairs:[[`Accurate / Good / Effective + use of + feature`,`The STRENGTH formula`],[`Misuse / Overuse / Omission / Confusion of + feature`,`The WEAKNESS formula`],[`Criterion → Point → Example (line ref)`,`The Task 4 three-part structure`]]}
+],
+quiz:[
+{q:`Which is a correctly written weakness?`,options:[`Misuse of articles (omission of the definite article)`,`The learner is bad at articles.`,`Articles`,`He does not know grammar.`],answer:0,explain:`Weakness = problem noun + of + feature, as a noun phrase.`},
+{q:`Which is a correctly written strength?`,options:[`Good use of present perfect and past simple together`,`The learner was good at the present simple.`,`Good vocabulary`,`Grammar`],answer:0,explain:`Strength = quality adjective + use of + feature. "Good vocabulary" is rejected.`},
+{q:`Which is the exact Cambridge criterion?`,options:[`Complexity of grammar`,`Grammar difficulty`,`Hard grammar`,`Grammar range`],answer:0,explain:`The wording is fixed; the rest are inventions.`},
+{q:`Every point must include…`,options:[`an example quoted from the learner text with a line reference`,`a coursebook rule`,`an invented example`,`the rubric page number`],answer:0,explain:`Examples come from the learner's own text.`},
+{q:`Better than "the learner's vocabulary was a strength"?`,options:[`Use of collocations / topic-related lexis`,`Vocabulary was nice`,`Good words`,`Lexis strong`],answer:0,explain:`Name the precise feature.`},
+{q:`"Overuse of and to link clauses" sits under…`,options:[`Cohesion`,`Punctuation`,`Task achievement`,`Phonology`],answer:0,explain:`Linking devices are Cohesion.`},
+{q:`"Capitalisation of ordinary nouns" is a weakness of…`,options:[`Punctuation`,`Cohesion`,`Style / Register`,`Complexity`],answer:0,explain:`Capitals and commas are Punctuation.`},
+{q:`Which follows the weakness formula?`,options:[`Overuse of high-frequency items (good, nice, big)`,`The learner repeats easy words.`,`Words too simple.`,`Vocabulary weak.`],answer:0,explain:`"Overuse of…" is the problem-noun + feature pattern.`},
+{q:`Why use exact rubric wording for the criterion?`,options:[`Cambridge uses a fixed set and penalises invented headings`,`it looks neater`,`to save time`,`it is optional`],answer:0,explain:`The criterion must be one of the fixed headings.`},
+{q:`A spoken-text phonology weakness?`,options:[`Wrong word stress (photoGRAPHer)`,`Accurate sentence stress`,`Use of weak forms`,`Clear intonation`],answer:0,explain:`The others are strengths.`},
+{q:`A Style / Register strength?`,options:[`Appropriate formality maintained throughout`,`Run-on sentences`,`Misuse of articles`,`One-sentence paragraphs`],answer:0,explain:`Consistent appropriate formality is the register strength.`},
+{q:`"Confusion of present perfect and past simple" is…`,options:[`a very common weakness of Accuracy of grammar`,`a strength`,`a punctuation issue`,`about layout`],answer:0,explain:`It is item 4 on the almost-always-present list, under Accuracy of grammar.`}
+]
+},
+/* ===== SECTION 3: PAPER 1 TASK 5 ===== */
+{
+id:'p1t5', code:'Paper 1 · Task 5', title:'Genre + Form & Use', badge:'T5',
+formula:`5a: feature + reason + quote &nbsp;•&nbsp; 5b FORM = noun-phrase label &nbsp;•&nbsp; 5c USE = Refers to / Used as / Shows…`,
+golden:[`5a features sit under fixed category headings, each with a quote.`,`Give only ONE layout feature (one mark for layout).`,`FORM = precise single noun-phrase labels.`,`USE starts with Refers to / Used as / Shows…`,`Connected speech needs /IPA/, even one symbol.`,`Say "-ing form" when unsure of gerund vs participle.`],
+warn:[`More than one layout feature — still one mark.`,`Mixing FORM and USE in one label.`,`Plain letters for phonology — no credit.`,`"third form of the verb" — say "Past participle".`,`"3rd person singular" when "3rd person" is enough.`,`Generic pre-learnt genre features that don't fit the text.`],
+decks:[
+{name:'5a categories', prompt:'Which 5a category heading?', pairs:[[`fonts, columns, photos, headings (ONE only)`,`Layout / Graphological`],[`topic-specific information for the genre`,`Content`],[`how information is sequenced`,`Organisation`],[`level of formality, tone`,`Style / Register`],[`verb forms characteristic of the genre`,`Grammatical features`],[`topic lexis, chunks typical of the genre`,`Lexical features`],[`turn-taking, fillers, parataxis (spoken)`,`Discourse features`],[`stress, intonation, connected speech (spoken)`,`Phonological features`]]},
+{name:'Genre · biography', prompt:'Which genre is this feature typical of?', def:'Biography / life story', items:[`Narrative tenses (past simple, past perfect)`,`Passive ("he was commissioned")`,`Time linkers / adverbials of time`,`Long noun phrases describing the subject`,`Relative clauses adding info about people`,`Participle clauses`,`Present perfect for the still-living`]},
+{name:'Genre · news', prompt:'Which genre is this feature typical of?', def:'News article', items:[`Past simple for completed events`,`Present perfect for present relevance`,`Passive ("X has been arrested")`,`Reported speech (claim, deny, allege)`,`Quoted direct speech in inverted commas`,`Headline grammar: ellipsis of articles`,`"to + infinitive" in headlines for future`]},
+{name:'Genre · recipe', prompt:'Which genre is this feature typical of?', def:'Recipe / procedure', items:[`Imperatives ("Beat the eggs")`,`Bare infinitive`,`Present simple to describe steps`,`Sequencing connectors (first, then, next)`,`Time clauses (when, until, as soon as)`,`Quantifiers and measurements ("a pinch of")`,`Conditional 1 for warnings ("if it sticks…")`]},
+{name:'Genre · formal letter', prompt:'Which genre is this feature typical of?', def:'Formal letter / business', items:[`Conditional structures for politeness`,`Modal verbs of politeness (would, could)`,`Indirect / embedded questions`,`No contractions`,`Fixed phrases ("I am writing to…")`,`Complex sentences with subordination`]},
+{name:'Genre · informal', prompt:'Which genre is this feature typical of?', def:'Informal letter / email', items:[`Contractions used throughout`,`Phrasal verbs`,`Ellipsis ("Hope you're well")`,`Direct questions to the reader`,`Exclamation marks for emphasis`,`Discourse markers (anyway, by the way)`]},
+{name:'Genre · advert', prompt:'Which genre is this feature typical of?', def:'Advertisement / promotion', items:[`Imperatives ("Discover", "Visit")`,`Superlatives ("the best")`,`Rhetorical questions`,`Short, elliptical sentences`,`Will / future for benefits ("you'll love it")`,`Conditional ("if you book today")`]},
+{name:'Genre · review', prompt:'Which genre is this feature typical of?', def:'Review (film / book)', items:[`Present simple to discuss the work`,`Present perfect for achievements`,`Past simple for plot summary`,`Evaluative adjectives in complement position`,`"I" + opinion verbs ("I think", "I felt")`]},
+{name:'Genre · academic', prompt:'Which genre is this feature typical of?', def:'Academic / argumentative essay', items:[`Passive voice for objectivity`,`Hedging (may, might, tend to)`,`Nominalisation (complex noun phrases)`,`Cleft sentences for emphasis`,`Reporting verbs ("research suggests")`,`Avoidance of the first person`]},
+{name:'Genre · narrative', prompt:'Which genre is this feature typical of?', def:'Narrative / short story', items:[`Past simple + continuous + perfect together`,`Direct speech with reporting clauses`,`Inversion after negative adverbials`,`Long descriptive noun phrases`,`Pronouns for character reference`]},
+{name:'Genre · conversation', prompt:'Which genre is this feature typical of?', def:'Conversation transcript', items:[`Ellipsis ("Coming with us?")`,`Question tags`,`Vague language ("sort of")`,`Discourse markers (you know, I mean)`,`Parataxis — short separated chunks`]},
+{name:'Genre · speech', prompt:'Which genre is this feature typical of?', def:'Speech / lecture / presentation', items:[`Rhetorical questions to engage`,`"we" to create inclusion`,`Signposting (firstly, to conclude)`,`Rule of three`,`Repetition for rhetorical effect`]},
+{name:'Genre · other', prompt:'Which genre is this feature typical of?', pairs:[[`Conversational register, "Try this", "Check out"`,`Blog post`],[`Descriptive adjectives, "you" for the traveller`,`Tourist / travel writing`],[`Reverse-chronological, action verbs, no pronouns`,`CV / résumé`],[`Modals of obligation, bullet duties, "we" for company`,`Job advertisement`],[`First-person plural "we", "the government should"`,`Editorial / opinion piece`]]},
+{name:'FORM · verbs', prompt:'What is the FORM label?', pairs:[[`was, have, do (helping verb)`,`Auxiliary`],[`can, must, should`,`Modal auxiliary`],[`be + past participle`,`Passive`],[`the -ing form working as a noun`,`Gerund`],[`-ing form after be / as a participle`,`Present participle / -ing form`],[`the form after "have" (e.g. eaten)`,`Past participle`],[`to + verb`,`Full infinitive`],[`verb without "to" after a modal`,`Bare infinitive`],[`a verb taking another verb (enjoy doing)`,`Catenative verb`],[`the dictionary / main verb`,`Lexical verb`],[`no subject (a command)`,`Imperative / ellipsis`]]},
+{name:'FORM · articles', prompt:'What is the FORM label?', pairs:[[`"the"`,`Definite article`],[`"a" / "an"`,`Indefinite article`],[`no article`,`Zero article`],[`"an" before a vowel sound`,`Indefinite article (vowel-sound rule)`],[`"the" before a unique, shared-knowledge noun`,`Definite article (unique reference)`]]},
+{name:'FORM · pronouns', prompt:'What is the FORM label?', pairs:[[`I, he, she, we`,`Subject pronoun`],[`me, him, us`,`Object pronoun`],[`my, his, our`,`Possessive adjective`],[`mine, his, ours`,`Possessive pronoun`],[`myself, herself`,`Reflexive pronoun`],[`who, which, that`,`Relative pronoun`],[`adds extra info, takes a comma`,`Non-defining relative clause`],[`essential info, no comma`,`Defining relative clause`]]},
+{name:'Referencing', prompt:'Which type of reference?', pairs:[[`refers back to something already mentioned`,`Anaphoric reference`],[`refers forward to something coming later`,`Cataphoric reference`],[`refers to the world outside the text`,`Exophoric reference`]]},
+{name:'Connected speech', prompt:'Which connected-speech feature?', pairs:[[`of /əv/, the /ðə/, your /jə/`,`Weak forms / schwa`],[`you are → /jʊwə/`,`Intrusive /w/`],[`are among → /ərəmʌŋ/`,`Linking /r/`],[`writers of → /raɪtəzəv/`,`Catenation (C+V linking)`],[`/t/ in "get" → /ʔ/`,`Assimilation`],[`/t/ dropped in "isn't it"`,`Elision`]]},
+{name:'USE starters', prompt:'What kind of USE answer does this start?', pairs:[[`Refers to / Refers back to`,`USE starter — referencing`],[`Used as / Used to / Used because`,`USE starter — function`],[`Shows / Indicates / Conveys`,`USE starter — meaning`],[`Avoids / Prevents / Eliminates`,`USE starter — cohesion`]]},
+{name:'Precision', prompt:'Why is this wrong?', pairs:[[`"third form of the verb"`,`Wrong — say "Past participle"`],[`plain letters for phonology`,`Wrong — use /IPA/ in slashes`],[`giving two layout features`,`Wrong — only ONE layout feature`],[`mixing form and use in one label`,`Wrong — keep FORM and USE separate`]]}
+],
+quiz:[
+{q:`In "She <u>was</u> born in 1940", the best FORM label for <i>was</i> is…`,options:[`Auxiliary (forming the passive)`,`a feeling`,`Adjective`,`it means she is old`],answer:0,explain:`"was born" is passive (be + past participle); "was" is the auxiliary. D describes use, not form.`},
+{q:`How many layout features should you give in 5a?`,options:[`One`,`Three`,`As many as possible`,`Two`],answer:0,explain:`One mark for layout regardless of how many you list.`},
+{q:`Which feature is most typical of a recipe?`,options:[`Imperatives ("Beat the eggs")`,`Hedging language`,`Inversion after negative adverbials`,`Reporting verbs ("allege")`],answer:0,explain:`Recipes run on imperatives.`},
+{q:`A USE (5c) explanation should begin with…`,options:[`Refers to / Used as / Shows`,`Auxiliary`,`Past participle`,`Definite article`],answer:0,explain:`Those last three are FORM labels; USE starts with verbs like Refers to.`},
+{q:`"writers of" → /raɪtəzəv/ is…`,options:[`catenation / linking a consonant to a following vowel`,`elision`,`assimilation`,`word stress`],answer:0,explain:`A final consonant links onto the next vowel.`},
+{q:`Unsure if an -ing word is a gerund or participle? You should…`,options:[`call it an "-ing form"`,`always say gerund`,`always say present participle`,`leave it unlabelled`],answer:0,explain:`Cambridge accepts "-ing form" when function is uncertain.`},
+{q:`Anaphoric reference means…`,options:[`refers back to something already mentioned`,`refers forward`,`refers outside the text`,`refers to nothing`],answer:0,explain:`Anaphoric looks back; cataphoric forward; exophoric outside.`},
+{q:`Passive voice, hedging and nominalisation point to…`,options:[`an academic essay`,`a recipe`,`a conversation transcript`,`an advertisement`],answer:0,explain:`Objectivity via passive, hedging and nominalisation marks academic writing.`},
+{q:`Why use the passive in "he was commissioned"?`,options:[`it keeps the subject as focus; the agent is unimportant`,`it is more exciting`,`it shows the future`,`it is informal`],answer:0,explain:`The passive foregrounds the subject and downplays the agent.`},
+{q:`"the" before a unique, shared-knowledge noun is…`,options:[`definite article (unique reference)`,`zero article`,`indefinite article`,`a preposition`],answer:0,explain:`That is the standard FORM-plus-reason label.`},
+{q:`Which is a Cambridge precision point?`,options:[`Say "Past participle", not "third form of the verb"`,`Write phonology in plain letters`,`Gerund equals infinitive`,`Schwa equals weak form`],answer:0,explain:`A weak form is not the same as schwa (schwa is one phoneme).`},
+{q:`A non-defining relative clause needs…`,options:[`a comma, because it gives extra, non-essential information`,`no comma, it is essential`,`a full stop`,`a question mark`],answer:0,explain:`Non-defining clauses take a comma; defining clauses do not.`}
+]
+},
+/* ===== SECTION 4: PAPER 2 TASK 1 ===== */
+{
+id:'p2t1', code:'Paper 2 · Task 1', title:'Evaluating a Test', badge:'P1',
+formula:`POINT → APPLICATION &nbsp;•&nbsp; every point names what learners or the teacher gain or lose`,
+golden:[`Give both positive and negative points.`,`Every point links to an application.`,`Weave the testing term into the point, never as a heading.`,`Start applications with "The learners will…" or "The teacher will…".`,`Name who benefits or loses, and how.`],
+warn:[`Laying answers in columns or two sections.`,`Using "content validity" or "reliability" as a heading.`,`A point with no application.`,`Forgetting who gains or loses.`],
+decks:[
+{name:'Test types', prompt:'Which test type is this?', pairs:[[`to place learners in the correct level`,`Placement test`],[`to identify strengths/weaknesses and plan the course`,`Diagnostic test`],[`to assess what has been learnt so far`,`Progress test`],[`to assess what has been learnt by the end of the course`,`Achievement test`],[`to assess overall ability regardless of any course`,`Proficiency test`],[`to predict ability to learn a language`,`Aptitude test`],[`taken at the end to summarise learning`,`Summative assessment`],[`taken during a course to inform teaching`,`Formative assessment`]]},
+{name:'Properties', prompt:'Which testing property is this?', pairs:[[`the test looks like a proper test`,`Face validity`],[`the test covers what was taught`,`Content validity`],[`it tests the underlying skill, not memory`,`Construct validity`],[`results predict future performance`,`Predictive validity`],[`the test gives consistent results`,`Reliability`],[`different markers give the same score`,`Scorer reliability`],[`the test is feasible to administer`,`Practicality`],[`the effect the test has on teaching/learning`,`Washback / backwash`],[`the test reflects real-world use`,`Authenticity`],[`marking from a fixed key`,`Objective marking`],[`marking by examiner judgement`,`Subjective marking`],[`the test reflects the actual task`,`Direct test`],[`tests underlying skills indirectly`,`Indirect test`],[`combines several skills (cloze, dictation)`,`Integrative test`],[`tests one item at a time (gap-fill)`,`Discrete-item test`],[`learners can recover from a poor start`,`Fresh starts`]]},
+{name:'Points', prompt:'Positive or negative point?', pairs:[[`The instructions are clear and an example is given.`,`Positive point`],[`The task type is familiar and recognisable.`,`Positive point`],[`It is a direct test of the learners' skills.`,`Positive point`],[`The prompts let learners use the language studied.`,`Positive point`],[`The marking is practical and objective.`,`Positive point`],[`Learners hear the recording twice.`,`Positive point`],[`The test is short, which makes it practical.`,`Positive point`],[`Visuals support comprehension.`,`Positive point`],[`It only tests one listening sub-skill.`,`Negative point`],[`The tapescript lacks features of spoken language.`,`Negative point`],[`Learners can avoid the language they studied.`,`Negative point`],[`The marking is subjective.`,`Negative point`],[`A discussion does not test grammatical accuracy.`,`Negative point`],[`Stronger learners dominate; weaker say little.`,`Negative point`],[`The test is too short to be reliable.`,`Negative point`],[`The interaction is artificial.`,`Negative point`]]},
+{name:'Applications', prompt:'Positive or negative application?', pairs:[[`The learners will feel motivated.`,`Positive application`],[`The learners will know what to do.`,`Positive application`],[`The learners can perform to the best of their abilities.`,`Positive application`],[`The teacher gets reliable information about progress.`,`Positive application`],[`The teacher can plan future lessons.`,`Positive application`],[`The test will be efficient to mark.`,`Positive application`],[`The learners may not trust the results.`,`Negative application`],[`The learners may be hindered by the format.`,`Negative application`],[`The teacher gets limited or inaccurate data.`,`Negative application`],[`The teacher cannot diagnose abilities.`,`Negative application`],[`The teacher cannot give individual feedback.`,`Negative application`]]},
+{name:'Structure', prompt:'Right or wrong for Task 1?', pairs:[[`POINT → APPLICATION`,`Right — the required structure`],[`"content validity" used as a heading`,`Wrong — weave it into the point`],[`answers laid out in two columns`,`Wrong — Cambridge says avoid columns`]]}
+],
+quiz:[
+{q:`A test that places learners into the right level is…`,options:[`placement test`,`diagnostic test`,`achievement test`,`aptitude test`],answer:0,explain:`Placement tests sort learners by general ability.`},
+{q:`A test identifying strengths and weaknesses to plan the course is…`,options:[`diagnostic`,`proficiency`,`summative`,`placement`],answer:0,explain:`Diagnosis pinpoints what to teach.`},
+{q:`"Objective marking gives consistent results" describes…`,options:[`reliability`,`authenticity`,`face validity`,`washback`],answer:0,explain:`Consistency from objective marking is reliability.`},
+{q:`Cambridge says you should NOT…`,options:[`use "reliability" as a heading`,`give negative points`,`mention the teacher`,`link a point to an application`],answer:0,explain:`Weave the term into the point; avoid headings and columns.`},
+{q:`Every point must link to…`,options:[`an application: what learners or the teacher gain or lose`,`a coursebook page`,`a methodologist`,`a transcription`],answer:0,explain:`Point then Application is the required structure.`},
+{q:`A test reflecting real-world use has high…`,options:[`authenticity`,`practicality`,`predictive validity`,`reliability`],answer:0,explain:`Matching real-world use is authenticity.`},
+{q:`"Knowing the format, learners prepare appropriately" is…`,options:[`positive washback`,`construct validity`,`scorer reliability`,`a fresh start`],answer:0,explain:`The effect of a test on teaching and learning is washback.`},
+{q:`A writing test that requires writing is a…`,options:[`direct test`,`indirect test`,`discrete-item test`,`aptitude test`],answer:0,explain:`When the test mirrors the real task it is direct.`},
+{q:`Which is a well-formed positive point?`,options:[`The prompts let learners use the language studied, so the test has content validity.`,`Content validity.`,`The test is good.`,`Validity: yes.`],answer:0,explain:`The term is woven into a full point.`},
+{q:`A proficiency test measures…`,options:[`overall ability regardless of any course`,`only this term's syllabus`,`readiness before instruction`,`progress in one unit`],answer:0,explain:`Proficiency is course-independent overall ability.`},
+{q:`A typical negative point about a discussion task is…`,options:[`stronger learners dominate, lowering reliability`,`the instructions are clear`,`it is a direct test of speaking`,`it has positive washback`],answer:0,explain:`Uneven participation reduces reliability.`},
+{q:`Applications should begin with…`,options:[`"The learners will…" or "The teacher will…"`,`"Content validity is…"`,`"In conclusion…"`,`"The rubric says…"`],answer:0,explain:`Name who benefits or loses, and how.`}
+]
+},
+/* ===== SECTION 5: PAPER 2 TASK 2 ===== */
+{
+id:'p2t2', code:'Paper 2 · Task 2', title:'Purposes & Assumptions', badge:'P2',
+formula:`(a) Purpose = "to + infinitive" &nbsp;•&nbsp; (b) Combination = "extends focus to…" &nbsp;•&nbsp; (c) ASSUMPTION + REASON + EXERCISE`,
+golden:[`Identify the lesson type first.`,`Every purpose starts with "to + infinitive" and names WHAT.`,`Combinations use "extends focus to…", "moves from… to…".`,`Each assumption: ASSUMPTION → REASON → EXERCISE.`,`Give SIX different assumptions, each tied to an exercise.`],
+warn:[`Listing pre-learnt assumptions with no exercise link.`,`Purposes that just say "to practise" with no WHAT.`,`Six variations of the same assumption.`,`Generic claims not justified by the material.`],
+decks:[
+{name:'Purpose · lead-in', prompt:'Which stage is this purpose for?', def:'Lead-in / warmer', items:[`to generate interest in the topic`,`to set the context for the TL`,`to activate (relevant) schemata`,`to create a need for the target language`,`to relax learners and create rapport`,`to recycle previously taught language`]},
+{name:'Purpose · diagnostic', prompt:'Which stage is this purpose for?', def:'Diagnostic / test (TTT)', items:[`to provide the opportunity to use the TL`,`to check what learners already know`,`to allow the teacher to see what students know`,`to identify problem areas before presentation`]},
+{name:'Purpose · presentation', prompt:'Which stage is this purpose for?', def:'Presentation of language', items:[`to provide examples of / present the TL`,`to draw attention to the form`,`to contextualise the TL`,`to provide a model of the language in use`,`to elicit the rule from learners (guided discovery)`]},
+{name:'Purpose · controlled', prompt:'Which stage is this purpose for?', def:'Controlled practice', items:[`to give controlled / written practice of the TL`,`to focus on form / spelling / pronunciation`,`to build accuracy before fluency`,`to consolidate the form-meaning link`]},
+{name:'Purpose · checking', prompt:'Which stage is this purpose for?', def:'Checking / consolidation', items:[`to check understanding of the TL`,`to check understanding of the form`,`to extend focus to pronunciation`,`to focus on features of connected speech`]},
+{name:'Purpose · production', prompt:'Which stage is this purpose for?', def:'Production / freer practice', items:[`to stage the production of the TL`,`to encourage personalised, creative use`,`to provide a context for meaningful use`,`to give scaffolding / a framework`]},
+{name:'Purpose · vocabulary', prompt:'Which stage is this purpose for?', def:'Vocabulary-specific', items:[`to teach context-related vocabulary`,`to revise vocabulary from the previous lesson`,`to expand learners' lexical sets`,`to encourage learners to notice collocations`,`to develop inferring meaning from context`]},
+{name:'Purpose · reading', prompt:'Which skill lesson is this purpose for?', def:'Reading lesson', items:[`to activate schemata before reading`,`to predict content from title / pictures`,`to develop reading for gist`,`to develop reading for specific information`,`to develop reading for detail`,`to provide a text-as-model for writing`]},
+{name:'Purpose · listening', prompt:'Which skill lesson is this purpose for?', def:'Listening lesson', items:[`to provide context for listening`,`to develop listening for gist`,`to develop listening for detail`,`to develop the ability to deal with connected speech`,`to develop strategies for unknown lexis`]},
+{name:'Purpose · writing', prompt:'Which skill lesson is this purpose for?', def:'Writing lesson', items:[`to raise awareness of the genre`,`to analyse a model text`,`to generate ideas for writing`,`to plan and organise content`,`to redraft / edit using feedback`,`to develop self- and peer-editing`]},
+{name:'Purpose · speaking', prompt:'Which skill lesson is this purpose for?', def:'Speaking lesson', items:[`to develop fluency through extended speaking`,`to provide meaningful interaction`,`to rehearse interaction in a safe environment`,`to develop confidence in spontaneous speaking`,`to create an information gap`]},
+{name:'Purpose · pronunciation', prompt:'Which skill lesson is this purpose for?', def:'Pronunciation lesson', items:[`to raise awareness of a pronunciation feature`,`to develop discrimination of phonemes`,`to focus on word / sentence stress`,`to focus on connected speech`,`to give controlled drilling for automaticity`]},
+{name:'Combinations', prompt:'What is this?', def:'Combination phrasing (part b)', items:[`extends focus to…`,`moves the focus from written to spoken`,`focuses on the pronunciation of the TL`,`provides a change of interaction pattern`,`gives freer practice after controlled practice`,`maintains the context established earlier`,`further checks / consolidates form or meaning`]},
+{name:'Combination moves', prompt:'Identify the combination move:', def:'Typical combination move', items:[`Receptive → Productive`,`Controlled written → freer oral`,`Recognition → Production`,`Whole-class → pair / group`,`Form focus → meaning focus`,`Familiar context → personalised context`]},
+{name:'Exercise → assumption', prompt:'Which assumption does this exercise show?', pairs:[[`Lead-in (picture / brainstorm)`,`Familiar topic motivates + visuals appeal`],[`Diagnostic test before teaching`,`Test-Teach-Test (build on prior knowledge)`],[`Guided-discovery rule task`,`Cognitive engagement + noticing + inductive`],[`Gap-fill / controlled practice`,`Accuracy before fluency`],[`Drilling`,`Pronunciation practice + chunks + automaticity`],[`Listen + identify stress`,`Pronunciation awareness + noticing`],[`Functional-language phrase bank`,`Chunks + scaffolding + written record`],[`Comparing two grammatical forms`,`Comparison/contrast (prevents fossilisation)`],[`Picture matching vocabulary`,`Visuals + recognition before production`],[`Listening to a model dialogue`,`Modelling + receptive → productive`],[`Role-play in pairs`,`Simulation + role distance + collaborative`],[`Free discussion / personalisation`,`Personalisation + freer practice`],[`Writing task with planning stage`,`Scaffolding + preparation (process writing)`],[`Speaking task after listening`,`Receptive → productive + integration`],[`Concept-check questions`,`Meaning before form`],[`Information-gap pair activity`,`Information gap + collaborative`],[`Recycling earlier vocabulary`,`Recycling / spaced repetition`],[`Activity with visuals + audio + reading`,`Variety of learning styles`]]},
+{name:'Assumption → reason', prompt:'What is the reason behind this assumption?', pairs:[[`Use a familiar topic`,`Helps relevance / motivation / schemata`],[`Learners need the TL in context`,`Context provides meaning; like learning L1`],[`Test-Teach-Test`,`Builds on prior learning; efficient class time`],[`Meaning, Form, Pronunciation order`,`Really knowing an item involves all three`],[`Compare / contrast confusing items`,`Prevents fossilisation; more accurate use`],[`Focus on pronunciation features`,`Helps recognise them outside class`],[`Drilling / repetition`,`Aids automaticity, fluency, being understood`],[`Cognitive engagement / challenge`,`Active engagement makes language memorable`],[`Scaffold step-by-step`,`Gives confidence; helps accuracy`],[`Use visuals`,`Saves time; aids memory; clarifies meaning`],[`Recognition before production`,`Useful scaffolding for less confident learners`],[`Use chunks / formulaic language`,`Aids fluency and confidence`],[`Discourse-level focus`,`Successful use needs attention above sentence level`],[`Style / register awareness`,`Formality differs across cultures`],[`Model before a task`,`Gives confidence; learners know what is expected`],[`Provide a written record`,`Helps review later; encourages independence`],[`Simulation / role-play`,`Reflects what learners do in real life`],[`Accuracy before fluency`,`Prevents fossilisation; gives a sense of progress`],[`Personalisation`,`Connecting to learners' lives aids retention`],[`Noticing features of language`,`Noticing is a prerequisite for learning (Schmidt)`],[`Guided discovery / inductive`,`Deeper processing; promotes autonomy`],[`Information gap`,`Creates a real reason to communicate`],[`Recycling / spaced repetition`,`Repeated exposure aids long-term retention`],[`Collaborative learning`,`Learners help each other while using language`]]},
+{name:'Structure', prompt:'What does this start, or why is it wrong?', pairs:[[`"to + infinitive"`,`How to start a PURPOSE`],[`"extends focus to…"`,`How to start a COMBINATION`],[`ASSUMPTION → REASON → EXERCISE`,`How to lay out an ASSUMPTION`],[`listing assumptions with no exercise link`,`Wrong — looks pre-learnt`]]}
+],
+quiz:[
+{q:`Every purpose statement in part (a) must begin with…`,options:[`"to + infinitive"`,`"It is helpful to…"`,`"The learners will…"`,`"extends focus to…"`],answer:0,explain:`Purposes start with "to + infinitive". "It is helpful to" begins an assumption; "extends focus to" a combination.`},
+{q:`The correct layout for an assumption (c) is…`,options:[`ASSUMPTION → REASON → EXERCISE`,`POINT → APPLICATION`,`Criterion → Point → Example`,`Feature → Example`],answer:0,explain:`Assumption, the reason it helps learning, and the exercise.`},
+{q:`A lead-in with pictures most directly shows…`,options:[`a familiar topic and visuals help learning`,`accuracy before fluency`,`Test-Teach-Test`,`discourse-level focus`],answer:0,explain:`Lead-ins activate schemata and use visuals.`},
+{q:`Drilling embodies which assumption?`,options:[`learners need controlled pronunciation practice / repetition`,`learners need a written record`,`communication needs an information gap`,`style awareness`],answer:0,explain:`Drilling is about repetition, accuracy and automaticity.`},
+{q:`Which combination phrasing does Cambridge prefer?`,options:[`extends the focus to pronunciation after the focus on form`,`the next one is also good`,`then they do another task`,`this is exercise three`],answer:0,explain:`Use "extends focus to…" and "moves from… to…".`},
+{q:`A guided-discovery rule task embodies…`,options:[`cognitive engagement, noticing, inductive approach`,`visuals, written record, modelling`,`role distance, collaboration, simulation`,`scorer reliability`],answer:0,explain:`Working out rules engages learners, requires noticing and is inductive.`},
+{q:`Why not just list assumptions?`,options:[`unless tied to the exercise, they look pre-learnt`,`there is no time`,`they are off-syllabus`,`they are always wrong`],answer:0,explain:`Generic assumptions count only when tied to a specific exercise.`},
+{q:`Part (c) asks for how many assumptions?`,options:[`six different ones, each tied to an exercise`,`three about pronunciation`,`as many as possible, repeated`,`one detailed one`],answer:0,explain:`Six genuinely different assumptions.`},
+{q:`Which purpose is correctly written?`,options:[`to give controlled written practice of the target language`,`practice`,`the learners enjoy it`,`good for fluency`],answer:0,explain:`It starts with "to + infinitive" and names WHAT.`},
+{q:`Reading then a follow-up discussion combines…`,options:[`receptive to productive, integrating skills`,`form to spelling`,`drilling to dictation`,`summative to formative`],answer:0,explain:`Reading into speaking integrates skills.`},
+{q:`The MFP assumption sequences an item as…`,options:[`meaning first, form second, pronunciation third`,`pronunciation then form then meaning`,`form only`,`meaning and form together, no pronunciation`],answer:0,explain:`Knowing an item means meaning, then form, then pronunciation.`},
+{q:`Role-play distance means…`,options:[`learners find it less intimidating to speak as a character`,`it is faster to mark`,`it tests reading`,`it needs no preparation`],answer:0,explain:`Taking a role lowers anxiety and supplies ideas.`}
+]
+}
+]};
+buildDecks(); buildHome(); refreshXP();
+</script>
+</body>
+</html>
