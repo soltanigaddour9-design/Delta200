@@ -3,6 +3,7 @@ import { QUALS, qualById } from './data/quals.js';
 import { GLOSSARY } from './data/glossary.js';
 import { renderViz } from './viz.js';
 import { GAMES, mountGame } from './games.js';
+import { ieltsRoutes, IELTS_NAV, ieltsNavKey, ieltsSearch } from './ielts.js';
 import { S, save, resetAll, recordRecall, topicStage, dueTopics, nextDueLabel, mastery, streak, level, addXP, touchDay, saveQuiz, bestScore, cardsDue } from './store.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -17,20 +18,22 @@ const QUAL_COLORS = { delta1: '#5b8cff', delta2: '#ff8a3d', delta3: '#c084fc', d
 function buildNav() {
   const groups = [
     ['Start', [['#/', 'Home', '#d4ff3a'], ['#/map', 'Knowledge map', '#f5f1e8', TOPICS.length]]],
+    ['IELTS Academic', IELTS_NAV],
     ['Knowledge', AREAS.map(a => [`#/area/${a.id}`, a.name, a.c, topicsOf(a.id).length])],
     ['Qualifications', QUALS.map(q => [`#/qual/${q.id}`, q.title, QUAL_COLORS[q.id]])],
     ['Library', [['#/scholars', 'Scholars and sources', '#ffcf6b', SCHOLARS.length], ['#/glossary', 'Glossary', '#f5d0a9', GLOSSARY.length]]],
     ['Practise', [['#/arcade', 'Games arcade', '#ff4fd8', GAMES.length], ['#/focus', 'Focus room', '#5eead4'], ['#/progress', 'My progress', '#facc15']]]
   ];
   $('#nav').innerHTML = groups.map(([h, items]) => `<h6>${h}</h6>` + items.map(([href, label, c, cnt]) => `<a href="${href}" style="--c:${c}"><span class="nd"></span>${esc(label)}${cnt ? `<span class="cnt">${cnt}</span>` : ''}</a>`).join('')).join('');
-  $('#tabbar').innerHTML = [['#/', '⌂', 'Home'], ['#/map', '✦', 'Learn'], ['#/quals', '◎', 'Exams'], ['#/arcade', '▶', 'Games'], ['#/scholars', '✎', 'Scholars']].map(([h, i, l]) => `<a href="${h}"><i>${i}</i>${l}</a>`).join('');
+  $('#tabbar').innerHTML = [['#/', '⌂', 'Home'], ['#/map', '✦', 'Learn'], ['#/quals', '◎', 'Exams'], ['#/ielts', '9', 'IELTS'], ['#/arcade', '▶', 'Games']].map(([h, i, l]) => `<a href="${h}"><i>${i}</i>${l}</a>`).join('');
 }
 function markNav(hash) {
   let key = hash.split('?')[0];
   const tm = key.match(/^#\/topic\/([\w-]+)/); if (tm) { const t = topicById(tm[1]); if (t) key = '#/area/' + t.area; }
   if (key.startsWith('#/game/')) key = '#/arcade';
   if (key.startsWith('#/scholar/')) key = '#/scholars';
-  const tabKey = key.startsWith('#/area') || key === '#/map' ? '#/map' : key.startsWith('#/qual') ? '#/quals' : key;
+  key = ieltsNavKey(key);
+  const tabKey = key.startsWith('#/area') || key === '#/map' ? '#/map' : key.startsWith('#/qual') ? '#/quals' : key.startsWith('#/ielts') ? '#/ielts' : key;
   $$('#nav a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === key));
   $$('#tabbar a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === tabKey));
 }
@@ -50,7 +53,8 @@ const routes = [
   [/^#\/?$/, home], [/^#\/map$/, mapView], [/^#\/area\/([\w-]+)$/, areaView], [/^#\/topic\/([\w-]+)$/, topicView],
   [/^#\/quals$/, qualsView], [/^#\/qual\/([\w-]+)$/, qualView], [/^#\/arcade$/, arcadeView], [/^#\/game\/([\w-]+(?:\?.*)?)$/, gameView],
   [/^#\/focus$/, focusView], [/^#\/glossary$/, glossaryView], [/^#\/progress$/, progressView],
-  [/^#\/scholars$/, scholarsView], [/^#\/scholar\/([\w-]+)$/, scholarView]
+  [/^#\/scholars$/, scholarsView], [/^#\/scholar\/([\w-]+)$/, scholarView],
+  ...ieltsRoutes({ view, crumbs, setSection, toast, confetti, updateMe })
 ];
 let cleanup = null;
 function render() {
@@ -64,7 +68,7 @@ function render() {
   if (!matched) cleanup = home() || null;
   markNav(hash); updateMe();
   view.classList.remove('view-enter'); void view.offsetWidth; view.classList.add('view-enter');
-  if (morphPending) { const h = $('.hero', view); if (h) h.style.viewTransitionName = 'morph'; }
+  if (morphPending) { const h = $('.hero, .hero-morph', view); if (h) h.style.viewTransitionName = 'morph'; }
   window.scrollTo({ top: 0, behavior: 'instant' });
   document.body.classList.remove('menu-open');
   afterRender();
@@ -159,6 +163,7 @@ function home() {
   </section>
   <div class="strip">${[.12, .3, .55, 1, .2, 1, .55, .3, .12].map(o => `<i style="--o:${o}"></i>`).join('')}</div>
 
+  <a class="ielts-banner rv" href="#/ielts" data-morph><span class="ib-stripes"></span><span class="ib-copy"><small>New · IELTS Academic</small><b>The corridor to 9</b><em>Task 1 graphs, Task 2 essays, speaking frames, C2 vocabulary and 11 purposeful games</em></span><span class="ib-doors"><i style="--c:#ffc21a"></i><i style="--c:#8b5cf6"></i><i style="--c:#23afa9"></i><i style="--c:#f2b705"></i><i style="--c:#ff5a36"></i></span><span class="ib-go">Enter →</span></a>
   <div class="section-title"><div><h2>Today's mission</h2><p>Four small things. Real effort, visible to you.</p></div></div>
   <div class="grid g4">
     <a class="card link mission rv" style="--c:#d4ff3a" href="${due.length ? `#/topic/${due[0].id}` : '#/progress'}" data-morph><span class="glow"></span><span class="k">Spaced review</span><h3>${due.length ? `${due.length} topic${due.length > 1 ? 's' : ''} due` : 'Nothing due yet'}</h3><p>${due.length ? esc(topicById(due[0].id)?.title || '') : 'Learn a topic and the app brings it back on day 2, 5, 12 and 30.'}</p><span class="go arrow">Go </span></a>
@@ -477,7 +482,8 @@ function setupSearch() {
     ...GLOSSARY.map(g => ({ t: g.term, s: g.def, h: `#/glossary`, c: areaById(g.area).c, k: 'Glossary' })),
     ...QUALS.map(q => ({ t: q.title, s: q.short, h: `#/qual/${q.id}`, c: QUAL_COLORS[q.id], k: 'Guide' })),
     ...GAMES.map(g => ({ t: g.name, s: g.desc, h: `#/game/${g.id}`, c: g.c, k: 'Game' })),
-    ...SCHOLARS.map(s => ({ t: s.name, s: s.works.map(w => w.work + ' ' + w.idea).join(' '), h: `#/scholar/${s.id}`, c: '#ffcf6b', k: 'Scholar' }))
+    ...SCHOLARS.map(s => ({ t: s.name, s: s.works.map(w => w.work + ' ' + w.idea).join(' '), h: `#/scholar/${s.id}`, c: '#ffcf6b', k: 'Scholar' })),
+    ...ieltsSearch()
   ];
   let sel = 0, res = [];
   const open = () => { layer.hidden = false; input.value = ''; draw(); setTimeout(() => input.focus(), 30); };
